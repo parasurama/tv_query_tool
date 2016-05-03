@@ -9,6 +9,8 @@ from bokeh.io import curdoc
 # load dataset
 df = pd.read_pickle('shows_df.pkl')
 
+network_list = sorted(list(set([df['networks'][i][0]['name'] for i in df.index if len(df.networks[i]) > 0])))
+
 # get column of list of genre names from list of dicts
 
 
@@ -18,6 +20,7 @@ def get_values(list):
 
 df['genre_list'] = df['genres'].map(get_values)
 df['keyword_list'] = df['keywords'].map(get_values)
+df['network_list'] = df['networks'].map(get_values)
 
 df.fillna(np.nan, inplace=True)
 
@@ -27,7 +30,9 @@ rating = Slider(title="Minimum average rating", value=0.0, start=0.0, end=df['vo
 status = Select(title='Show Status', options=['All', 'Ended', 'Returning Series', 'Canceled', 'In Production', 'Planned'], value='All')
 #show_type = Select(title='Show Type', options=['All', 'Reality', 'Documentary', 'Talk Show', 'Scripted'], value='All')
 genre = Select(title='Genre', options=list(pd.read_pickle('genres.pkl')), value='All')
-keyword = TextInput(title='Keyword')
+keyword = TextInput(title='Plot Keywords')
+network = Select(title="Select Network", options=list(pd.read_pickle('networks.pkl')), value='All')
+
 
 # initialize data source for bokeh
 source1 = ColumnDataSource(data=dict(x=[], y=[], title=[], ym=[1, 1], x2=[10,600]))
@@ -61,6 +66,9 @@ def subset_shows():
     if genre.value != 'All':
         subset = subset[subset.genre_list.str.contains(genre.value)]
 
+    if network.value != 'All':
+        subset = subset[subset.network_list.str.contains(network.value)]
+
     if keyword.value.strip() != '':
         if any(subset.keyword_list.str.contains(keyword.value.strip())) == False:
             subset = subset[subset['name'] == 'No Valid Shows']
@@ -84,7 +92,7 @@ def update(attrname, old, new):
                             ym=[0,0],
                             x2=[0, 0])
 
-controls = [votes, rating, status, genre, keyword]
+controls = [votes, rating, status, network, genre, keyword]
 for control in controls:
     control.on_change('value', update)
 
