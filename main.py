@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from bokeh.plotting import *
 from bokeh.models import ColumnDataSource, HoverTool, HBox, VBoxForm, Span
-from bokeh.models.widgets import Slider, Select
+from bokeh.models.widgets import Slider, Select, TextInput
 from bokeh.io import curdoc
 
 
@@ -21,14 +21,15 @@ def get_values(list):
     return values
 
 df['genre_list'] = df['genres'].map(get_values)
-
+df['keyword_list'] = df['keywords'].map(get_values)
 
 # controls
 votes = Slider(title="Minimum number of votes", value=0, start=5, end=df['vote_count'].max(), step=10)
 rating = Slider(title="Minimum average rating", value=0.0, start=0.0, end=df['vote_average'].max(), step=0.5)
 status = Select(title='Show Status', options=['All', 'Ended', 'Returning Series', 'Canceled', 'In Production', 'Planned'], value='All')
-show_type = Select(title='Show Type', options=['All', 'Reality', 'Documentary', 'Talk Show', 'Scripted'], value='All')
+#show_type = Select(title='Show Type', options=['All', 'Reality', 'Documentary', 'Talk Show', 'Scripted'], value='All')
 genre = Select(title='Genre', options=list(pd.read_pickle('genres.pkl')), value='All')
+keyword = TextInput(title='Keywords')
 
 # initialize data source for bokeh
 source1 = ColumnDataSource(data=dict(x=[], y=[], title=[], ym=[1, 1], x2=[10,600]))
@@ -56,12 +57,14 @@ def subset_shows():
     if status.value != 'All':
         subset = subset[subset.status == status.value]
 
-    if show_type.value != 'All':
-        subset = subset[subset.type == show_type.value]
+    #if show_type.value != 'All':
+     #   subset = subset[subset.type == show_type.value]
 
     if genre.value != 'All':
         subset = subset[subset.genre_list.str.contains(genre.value)]
 
+    if keyword.value != '':
+        subset = subset[subset.keyword_list.str.contains(keyword.value) == True]
     return subset
 
 def update(attrname, old, new):
@@ -72,7 +75,7 @@ def update(attrname, old, new):
                         ym=[df2['vote_average'].mean(), df2['vote_average'].mean()],
                         x2=[df2['vote_count'].min()-2,df2['vote_count'].max()])
 
-controls = [votes, rating, status, show_type, genre]
+controls = [votes, rating, status, genre, keyword]
 for control in controls:
     control.on_change('value', update)
 
