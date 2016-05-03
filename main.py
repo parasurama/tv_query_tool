@@ -8,7 +8,6 @@ from bokeh.io import curdoc
 
 # load dataset
 df = pd.read_pickle('shows_df.pkl')
-df = df[df.vote_count > 1]
 
 # clean data set
 df.fillna(np.nan, inplace=True)

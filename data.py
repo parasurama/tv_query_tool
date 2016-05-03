@@ -40,6 +40,7 @@ pickle.dump(shows, output)
 output.close()
 
 df = pd.DataFrame(shows)
+df = df[df.vote_count > 1]
 pd.to_pickle(df, 'shows_df.pkl')
 
 
