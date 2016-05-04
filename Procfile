@@ -1,2 +1,2 @@
-web: bokeh serve --port $PORT --host tv-query-tool.herokuapp.com main.py
+web: bokeh serve --port $PORT --host tvquerytool.herokuapp.com main.py
 
