@@ -13,7 +13,6 @@ network_list = sorted(list(set([df['networks'][i][0]['name'] for i in df.index i
 
 # get column of list of genre names from list of dicts
 
-
 def get_values(list):
     values = str([list[i]['name'] for i in range(0,len(list))]).strip("[]")
     return values
