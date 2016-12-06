@@ -7,52 +7,16 @@ from bokeh.io import curdoc
 
 
 # load dataset
-df = pd.read_pickle('shows_df.pkl')
+df = pd.read_pickle('data/shows_df.pkl')
 
 network_list = sorted(list(set([df['networks'][i][0]['name'] for i in df.index if len(df.networks[i]) > 0])))
 
 # get column of list of genre names from list of dicts
 
+
 def get_values(list):
     values = str([list[i]['name'] for i in range(0,len(list))]).strip("[]")
     return values
-
-df['genre_list'] = df['genres'].map(get_values)
-df['keyword_list'] = df['keywords'].map(get_values)
-df['network_list'] = df['networks'].map(get_values)
-
-df.fillna(np.nan, inplace=True)
-
-# controls
-votes = Slider(title="Minimum number of votes", value=0, start=5, end=df['vote_count'].max(), step=10)
-rating = Slider(title="Minimum average rating", value=0.0, start=0.0, end=df['vote_average'].max(), step=0.5)
-status = Select(title='Show Status', options=['All', 'Ended', 'Returning Series', 'Canceled', 'In Production', 'Planned'], value='All')
-#show_type = Select(title='Show Type', options=['All', 'Reality', 'Documentary', 'Talk Show', 'Scripted'], value='All')
-genre = Select(title='Genre', options=list(pd.read_pickle('genres.pkl')), value='All')
-keyword = TextInput(title='Plot Keywords')
-network = Select(title="Select Network", options=list(pd.read_pickle('networks.pkl')), value='All')
-
-
-# initialize data source for bokeh
-source1 = ColumnDataSource(data=dict(x=[], y=[], title=[], ym=[1, 1], x2=[10,600]))
-
-hover = HoverTool(tooltips=[
-    ("Title","@title"),
-    ("Avg Rating", "@y"),
-    ("Number of Votes", "@x")])
-
-# initialize figure for bokeh
-p = Figure(plot_height=600, plot_width=600,
-           title="TV Show Ratings",
-           x_axis_label='Vote Count',
-           y_axis_label='Average Vote',
-           toolbar_location=None,
-           tools=[hover])
-
-p.circle(x="x", y="y", source=source1, size=8, line_color=None, fill_alpha=0.7)
-p.line(x="x2", y='ym', source=source1, color = "orange", legend='Average Rating for Selected Data', line_width=3)
-
-
 def subset_shows():
     subset = df[(df.vote_count >= votes.value) & (df.vote_average >= rating.value)]
 
@@ -90,6 +54,43 @@ def update(attrname, old, new):
                             title=df2['name'],
                             ym=[0,0],
                             x2=[0, 0])
+
+df['genre_list'] = df['genres'].map(get_values)
+df['keyword_list'] = df['keywords'].map(get_values)
+df['network_list'] = df['networks'].map(get_values)
+
+df.fillna(np.nan, inplace=True)
+
+# controls
+votes = Slider(title="Minimum number of votes", value=0, start=5, end=df['vote_count'].max(), step=10)
+rating = Slider(title="Minimum average rating", value=0.0, start=0.0, end=df['vote_average'].max(), step=0.5)
+status = Select(title='Show Status', options=['All', 'Ended', 'Returning Series', 'Canceled', 'In Production', 'Planned'], value='All')
+#show_type = Select(title='Show Type', options=['All', 'Reality', 'Documentary', 'Talk Show', 'Scripted'], value='All')
+genre = Select(title='Genre', options=list(pd.read_pickle('genres.pkl')), value='All')
+keyword = TextInput(title='Plot Keywords')
+network = Select(title="Select Network", options=list(pd.read_pickle('networks.pkl')), value='All')
+
+
+# initialize data source for bokeh
+source1 = ColumnDataSource(data=dict(x=[], y=[], title=[], ym=[1, 1], x2=[10,600]))
+
+hover = HoverTool(tooltips=[
+    ("Title","@title"),
+    ("Avg Rating", "@y"),
+    ("Number of Votes", "@x")])
+
+# initialize figure for bokeh
+p = Figure(plot_height=600, plot_width=600,
+           title="TV Show Ratings",
+           x_axis_label='Vote Count',
+           y_axis_label='Average Vote',
+           toolbar_location=None,
+           tools=[hover])
+
+p.circle(x="x", y="y", source=source1, size=8, line_color=None, fill_alpha=0.7)
+p.line(x="x2", y='ym', source=source1, color = "orange", legend='Average Rating for Selected Data', line_width=3)
+
+
 
 controls = [votes, rating, status, network, genre, keyword]
 for control in controls:

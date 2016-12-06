@@ -35,13 +35,13 @@ while id <= last_id:
         id += 1
 print('done')
 
-output = open('all_shows.pkl', 'wb')
+output = open('data/all_shows.pkl', 'wb')
 pickle.dump(shows, output)
 output.close()
 
 df = pd.DataFrame(shows)
 df = df[df.vote_count > 1]
-pd.to_pickle(df, 'shows_df.pkl')
+pd.to_pickle(df, 'data/shows_df.pkl')
 
 
 
